@@ -1,17 +1,19 @@
 {
-  "name": "projekt",
+  "name": "zad1",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "babel script.js --watch --out-file build.js"
+    "start": "babel script.js --watch --out-file script-compiled.js",
+    "www": "http-server"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-react": "^6.24.1"
+    "babel-preset-latest": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "http-server": "^0.11.1"
   }
 }
