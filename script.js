@@ -1,122 +1,68 @@
-class Stopwatch extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            running: false,
-            times: {
-                minutes: 0,
-                seconds: 0,
-                miliseconds: 0
-            },
-            watch: null,
-            savedTimes: []
-        };
-    }
-    getFormattedTime() {
-        return `${pad0(this.state.times.minutes)}:${pad0(this.state.times.seconds)}:${pad0(Math.floor(this.state.times.miliseconds))}`;
-    }
-    start() {
-        if (!this.state.running) {
-            this.setState({
-                running: true,
-                watch: setInterval(() => this.step(), 10)
-            });
-        }
-    }
-    stop() {
-        this.setState({
-            running: false
-        });
-        clearInterval(this.state.watch);
-    }
-    step() {
-        if (!this.state.running) return;
-        this.calculate();
-    }
-    calculate() {
-        this.setState({
-            times: {
-                miliseconds: this.state.times.miliseconds + 1
-            }
-        });
-        if (!this.state.times.miliseconds >= 100) {
-            this.setState({
-                times: {
-                    seconds: this.state.times.seconds + 1,
-                    miliseconds: this.state.times.miliseconds = 0
-                }
-            });
-        };
-        if (!this.state.times.seconds >= 60) {
-            this.setState({
-                times: {
-                    minutes: this.state.times.minutes + 1,
-                    seconds: this.state.times.seconds = 0
-                }
-            });
-        } 
-    }
-    resetStopwatch() {
-        this.setState({
-            running: true,
-            times: {
-            minutes: 0,
-            seconds: 0,
-            miliseconds: 0
-            }
-        })
-    }
-    write() {
-        save(this.format(this.times));
-    }
-    render() {
-    	return (
-            <div>
-                <nav class="controls">
-                  <a href="#" class="button" id="start" onClick={this.start.bind(this)}>Start</a>
-                  <a href="#" class="button" id="stop" onClick={this.stop.bind(this)}>Stop</a>
-                  <a href="#" class="button" id="reset" onClick={this.resetStopwatch.bind(this)}>Reset</a>
-                  <a href="#" class="button" id="write">Write</a>
-                </nav>
-                <div class="stopwatch">{ this.getFormattedTime() /* mm:ss:ms */ }</div>
-                <ul class="results"></ul>
-            </div>
-        );
-    }
+class App extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      searchText: '',
+      users: []
+    };
+  }
+
+  onChangeHandle(event) {
+    this.setState({searchText: event.target.value});
+  }
+
+  onSubmit(event) {
+    event.preventDefault();
+    const {searchText} = this.state;
+    const url = `https://api.github.com/search/users?q=${searchText}`;
+    fetch(url)
+      .then(response => response.json())
+      .then(responseJson => this.setState({users: responseJson.items}));
+  }
+
+  render() {
+    return (
+      <div>
+        <form onSubmit={event => this.onSubmit(event)}>
+          <label htmlFor="searchText">Search by user name</label>
+          <input
+            type="text"
+            id="searchText"
+            onChange={event => this.onChangeHandle(event)}
+            value={this.state.searchText}/>
+        </form>
+        <UsersList users={this.state.users}/>
+      </div>
+    );
+  }
 }
 
-function pad0(value) {
-    let result = value.toString();
-    if (result.length < 2) {
-        result = '0' + result;
-    }
-    return result;
+class UsersList extends React.Component {
+  get users() {
+    return this.props.users.map(user => <User key={user.id} user={user}/>);
+  }
+
+  render() {
+    return (
+      <div>
+        {this.users}
+      </div>
+    );
+  }
 }
 
-function save(timer) {
-    let res = document.createElement('li');
-    res.innerText = timer;
-
-    let tab = document.querySelector('.results');
-    tab.insertBefore(res, tab.childNodes[0])
+class User extends React.Component {
+  render() {
+    return (
+      <div>
+        <img src={this.props.user.avatar_url} style={{maxWidth: '100px'}}/>
+        <a href={this.props.user.html_url} target="_blank">{this.props.user.login}</a>
+      </div>
+    );
+  }
 }
 
-ReactDOM.render(<Stopwatch />, document.getElementById("app"));
-
-/*const stopwatch = new Stopwatch(
-    document.querySelector('.stopwatch'));*/
-
-// let stopwatch = React.createElement(Stopwatch);
-// ReactDOM.render(stopwatch, document.querySelector('.stopwatch'));
-
-// let startButton = document.getElementById('start');
-// startButton.addEventListener('click', () => stopwatch.start());
-
-// let stopButton = document.getElementById('stop');
-// stopButton.addEventListener('click', () => stopwatch.stop());
-
-// let resetButton = document.getElementById('reset');
-// resetButton.addEventListener('click', () => stopwatch.reset());
-
-// let writeButton = document.getElementById('write');
-// writeButton.addEventListener('click', () => stopwatch.write());
+ReactDOM.render(
+  <App />,
+  document.getElementById('app')
+);

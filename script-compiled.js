@@ -8,177 +8,131 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Stopwatch = function (_React$Component) {
-    _inherits(Stopwatch, _React$Component);
+var App = function (_React$Component) {
+  _inherits(App, _React$Component);
 
-    function Stopwatch(props) {
-        _classCallCheck(this, Stopwatch);
+  function App() {
+    _classCallCheck(this, App);
 
-        var _this = _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
-        _this.state = {
-            running: false,
-            times: {
-                minutes: 0,
-                seconds: 0,
-                miliseconds: 0
-            },
-            watch: null,
-            savedTimes: []
-        };
-        return _this;
+    _this.state = {
+      searchText: '',
+      users: []
+    };
+    return _this;
+  }
+
+  _createClass(App, [{
+    key: "onChangeHandle",
+    value: function onChangeHandle(event) {
+      this.setState({ searchText: event.target.value });
     }
+  }, {
+    key: "onSubmit",
+    value: function onSubmit(event) {
+      var _this2 = this;
 
-    _createClass(Stopwatch, [{
-        key: "getFormattedTime",
-        value: function getFormattedTime() {
-            return pad0(this.state.times.minutes) + ":" + pad0(this.state.times.seconds) + ":" + pad0(Math.floor(this.state.times.miliseconds));
-        }
-    }, {
-        key: "start",
-        value: function start() {
-            var _this2 = this;
+      event.preventDefault();
+      var searchText = this.state.searchText;
 
-            if (!this.state.running) {
-                this.setState({
-                    running: true,
-                    watch: setInterval(function () {
-                        return _this2.step();
-                    }, 10)
-                });
-            }
-        }
-    }, {
-        key: "stop",
-        value: function stop() {
-            this.setState({
-                running: false
-            });
-            clearInterval(this.state.watch);
-        }
-    }, {
-        key: "step",
-        value: function step() {
-            if (!this.state.running) return;
-            this.calculate();
-        }
-    }, {
-        key: "calculate",
-        value: function calculate() {
-            this.setState({
-                times: {
-                    miliseconds: this.state.times.miliseconds + 1
-                }
-            });
-            if (!this.state.times.miliseconds >= 100) {
-                this.setState({
-                    times: {
-                        seconds: this.state.times.seconds + 1,
-                        miliseconds: this.state.times.miliseconds = 0
-                    }
-                });
-            };
-            if (!this.state.times.seconds >= 60) {
-                this.setState({
-                    times: {
-                        minutes: this.state.times.minutes + 1,
-                        seconds: this.state.times.seconds = 0
-                    }
-                });
-            }
-        }
-    }, {
-        key: "resetStopwatch",
-        value: function resetStopwatch() {
-            this.setState({
-                running: true,
-                times: {
-                    minutes: 0,
-                    seconds: 0,
-                    miliseconds: 0
-                }
-            });
-        }
-    }, {
-        key: "write",
-        value: function write() {
-            save(this.format(this.times));
-        }
-    }, {
-        key: "render",
-        value: function render() {
-            return React.createElement(
-                "div",
-                null,
-                React.createElement(
-                    "nav",
-                    { "class": "controls" },
-                    React.createElement(
-                        "a",
-                        { href: "#", "class": "button", id: "start", onClick: this.start.bind(this) },
-                        "Start"
-                    ),
-                    React.createElement(
-                        "a",
-                        { href: "#", "class": "button", id: "stop", onClick: this.stop.bind(this) },
-                        "Stop"
-                    ),
-                    React.createElement(
-                        "a",
-                        { href: "#", "class": "button", id: "reset", onClick: this.resetStopwatch.bind(this) },
-                        "Reset"
-                    ),
-                    React.createElement(
-                        "a",
-                        { href: "#", "class": "button", id: "write" },
-                        "Write"
-                    )
-                ),
-                React.createElement(
-                    "div",
-                    { "class": "stopwatch" },
-                    this.getFormattedTime() /* mm:ss:ms */
-                ),
-                React.createElement("ul", { "class": "results" })
-            );
-        }
-    }]);
+      var url = "https://api.github.com/search/users?q=" + searchText;
+      fetch(url).then(function (response) {
+        return response.json();
+      }).then(function (responseJson) {
+        return _this2.setState({ users: responseJson.items });
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this3 = this;
 
-    return Stopwatch;
+      return React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "form",
+          { onSubmit: function onSubmit(event) {
+              return _this3.onSubmit(event);
+            } },
+          React.createElement(
+            "label",
+            { htmlFor: "searchText" },
+            "Search by user name"
+          ),
+          React.createElement("input", {
+            type: "text",
+            id: "searchText",
+            onChange: function onChange(event) {
+              return _this3.onChangeHandle(event);
+            },
+            value: this.state.searchText })
+        ),
+        React.createElement(UsersList, { users: this.state.users })
+      );
+    }
+  }]);
+
+  return App;
 }(React.Component);
 
-function pad0(value) {
-    var result = value.toString();
-    if (result.length < 2) {
-        result = '0' + result;
+var UsersList = function (_React$Component2) {
+  _inherits(UsersList, _React$Component2);
+
+  function UsersList() {
+    _classCallCheck(this, UsersList);
+
+    return _possibleConstructorReturn(this, (UsersList.__proto__ || Object.getPrototypeOf(UsersList)).apply(this, arguments));
+  }
+
+  _createClass(UsersList, [{
+    key: "render",
+    value: function render() {
+      return React.createElement(
+        "div",
+        null,
+        this.users
+      );
     }
-    return result;
-}
+  }, {
+    key: "users",
+    get: function get() {
+      return this.props.users.map(function (user) {
+        return React.createElement(User, { key: user.id, user: user });
+      });
+    }
+  }]);
 
-function save(timer) {
-    var res = document.createElement('li');
-    res.innerText = timer;
+  return UsersList;
+}(React.Component);
 
-    var tab = document.querySelector('.results');
-    tab.insertBefore(res, tab.childNodes[0]);
-}
+var User = function (_React$Component3) {
+  _inherits(User, _React$Component3);
 
-ReactDOM.render(React.createElement(Stopwatch, null), document.getElementById("app"));
+  function User() {
+    _classCallCheck(this, User);
 
-/*const stopwatch = new Stopwatch(
-    document.querySelector('.stopwatch'));*/
+    return _possibleConstructorReturn(this, (User.__proto__ || Object.getPrototypeOf(User)).apply(this, arguments));
+  }
 
-// let stopwatch = React.createElement(Stopwatch);
-// ReactDOM.render(stopwatch, document.querySelector('.stopwatch'));
+  _createClass(User, [{
+    key: "render",
+    value: function render() {
+      return React.createElement(
+        "div",
+        null,
+        React.createElement("img", { src: this.props.user.avatar_url, style: { maxWidth: '100px' } }),
+        React.createElement(
+          "a",
+          { href: this.props.user.html_url, target: "_blank" },
+          this.props.user.login
+        )
+      );
+    }
+  }]);
 
-// let startButton = document.getElementById('start');
-// startButton.addEventListener('click', () => stopwatch.start());
+  return User;
+}(React.Component);
 
-// let stopButton = document.getElementById('stop');
-// stopButton.addEventListener('click', () => stopwatch.stop());
-
-// let resetButton = document.getElementById('reset');
-// resetButton.addEventListener('click', () => stopwatch.reset());
-
-// let writeButton = document.getElementById('write');
-// writeButton.addEventListener('click', () => stopwatch.write());
+ReactDOM.render(React.createElement(App, null), document.getElementById('app'));
